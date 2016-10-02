@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Azamon">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../Azamon/Azamon" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
