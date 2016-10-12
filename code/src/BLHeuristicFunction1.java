@@ -6,7 +6,7 @@ import aima.search.framework.HeuristicFunction;
  * Created by felix on 03.10.16.
  */
 
-/*This Heuristic Functions is the one that only uses one attribute (costes) for it's heuristics.
+/*This Heuristic Function is the one that only uses one attribute (costes) for it's heuristics.
  * The heuristic is derived from a relaxed problem, in which the maximumPeso restrictions are ignored.
  * Therefore all paquetes are assigned to the cheapest oferta, whose arrivalDate satisfies it's prioridad.
  * */
@@ -20,7 +20,7 @@ public class BLHeuristicFunction1 implements HeuristicFunction{
 
         //cast given object to BLState and get all relevant attributes
         BLState state = (BLState)o;
-        BLDynamicState dynState = state.getDynamicState();
+        int [] assignment = state.getAssignment();
         Paquete[] paquetes = BLState.getPaquetes();
         Oferta[] ofertas = BLState.getOfertas();
         int [] diaIndices = BLState.getDiaIndices();
@@ -32,15 +32,17 @@ public class BLHeuristicFunction1 implements HeuristicFunction{
         double minPrecio;
 
         //approximiate the minimum cost of all unassigned paquetes and add it to value
-        for(int i = dynState.getPaqNum(); i<paquetes.length; i++){
-            minPrecio = BLState.butWhatDoesItCost(paquetes[i].getPeso(), ofertas[0].getDias(), ofertas[0].getPrecio());
-            maxDays=BLState.maxDiaOfPrio(paquetes[i].getPrioridad());
-            for(int j=0; j<maxDays-1; j++){
-                oferta = ofertas[diaIndices[j]];
-                precio = BLState.butWhatDoesItCost(paquetes[i].getPeso(), oferta.getDias(), oferta.getPrecio());
-                if(precio < minPrecio) minPrecio=precio;
+        for(int i = 0; i<paquetes.length; i++){
+            if(assignment[i]<0){
+                minPrecio = BLState.butWhatDoesItCost(paquetes[i].getPeso(), ofertas[0].getDias(), ofertas[0].getPrecio());
+                maxDays=BLState.maxDiaOfPrio(paquetes[i].getPrioridad());
+                for(int j=0; j<maxDays-1; j++){
+                    oferta = ofertas[diaIndices[j]];
+                    precio = BLState.butWhatDoesItCost(paquetes[i].getPeso(), oferta.getDias(), oferta.getPrecio());
+                    if(precio < minPrecio) minPrecio=precio;
+                }
+                value+=minPrecio;
             }
-            value+=minPrecio;
         }
 
         return value;

@@ -15,6 +15,7 @@ public class BLHeuristicFunction2 implements HeuristicFunction{
 
     public BLHeuristicFunction2(){}
 
+    //This is the value that we assign to one point of felicidad
     private static final double FELICIDADVALUE = 10.0;
 
     @Override
@@ -23,7 +24,7 @@ public class BLHeuristicFunction2 implements HeuristicFunction{
 
         //cast given object to BLState and get all relevant attributes
         BLState state = (BLState)o;
-        BLDynamicState dynState = state.getDynamicState();
+        int [] assignment = state.getAssignment();
         Paquete[] paquetes = BLState.getPaquetes();
         Oferta[] ofertas = BLState.getOfertas();
         int [] diaIndices = BLState.getDiaIndices();
@@ -35,14 +36,16 @@ public class BLHeuristicFunction2 implements HeuristicFunction{
         double minPrecio;
 
         //approximiate the minimum value of all unassigned paquetes and add it to value
-        for(int i = dynState.getPaqNum(); i<paquetes.length; i++){
-            minPrecio = calculatePrecio(ofertas[0], paquetes[i]);
-            for(int j=1; j<state.getOfertaPartLengthByPrio(paquetes[i].getPrioridad()); j++){
-                oferta = ofertas[j];
-                precio = calculatePrecio(oferta, paquetes[i]);
-                if(precio < minPrecio) minPrecio=precio;
+        for(int i = 0; i<paquetes.length; i++){
+            if(assignment[i]<0){
+                minPrecio = calculatePrecio(ofertas[0], paquetes[i]);
+                for(int j=1; j<state.getOfertaPartLengthByPrio(paquetes[i].getPrioridad()); j++){
+                    oferta = ofertas[j];
+                    precio = calculatePrecio(oferta, paquetes[i]);
+                    if(precio < minPrecio) minPrecio=precio;
+                }
+                value+=minPrecio;
             }
-            value+=minPrecio;
         }
 
         return value;

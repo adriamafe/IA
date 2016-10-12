@@ -6,17 +6,24 @@
 public class BLDynamicState {
     private int costes;
     private int felicidad;
-    //number of allready assigned packages (=index of next package)
-    private int paqNum;
+    private int [] assignment;
     //remaining space in the offers
     private double[] pesoRests;
 
-    public BLDynamicState(int costes, int felicidad, int paqNum, double[] pesoRests) {
+    public BLDynamicState(int [] assignment, int costes, int felicidad, double[] pesoRests) {
+        this.assignment = assignment;
         this.costes = costes;
         this.felicidad = felicidad;
-        this.paqNum = paqNum;
         this.pesoRests = pesoRests;
     }
+
+    //returns a copy of assignment, not the array itself
+    public int[] getAssignment() {
+        int[] assignmentCopy = new int[assignment.length];
+        System.arraycopy(assignment, 0, assignmentCopy, 0, assignment.length);
+        return assignmentCopy;
+    }
+
 
     public int getCostes() {
         return costes;
@@ -24,10 +31,6 @@ public class BLDynamicState {
 
     public int getFelicidad() {
         return felicidad;
-    }
-
-    public int getPaqNum() {
-        return paqNum;
     }
 
     //returns a copy of pesoRests, not the array itself

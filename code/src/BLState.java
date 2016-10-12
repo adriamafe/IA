@@ -32,13 +32,13 @@ public class BLState {
     private static Oferta[] ofertas;
     //indexing on delivery dates of ofertas, i.e. diaIndices[x]=number of ofertas with oferta.dias<=x+1
     private static int[] diaIndices;
-    
-    private int costes;
+
+    private int [] assignment;
+    private double costes;
     private int felicidad;
-    //number of allready assigned packages (=index of next package)
-    private int paqNum;
     //remaining space in the offers
     private double[] pesoRests;
+
 
     /**This constructor is only called one time (when the initial state is created).
      * It sorts the given Paquetes and Transporte, converts them into arrays and stores them as static attributes.
@@ -55,10 +55,15 @@ public class BLState {
         trans.sort(ofComparator);
         ofertas = trans.toArray(new Oferta[trans.size()]);
 
-        //initialize costes, felicidad and paqNum with 0
+        //initialize assignment as completely unassigned, i.e. [-1,...,-1]
+        assignment = new int [paquetes.length];
+        for (int i = 0; i<assignment.length; i++){
+            assignment[i]=-1;
+        }
+
+        //initialize costes and felicidad with 0
         costes = 0;
         felicidad = 0;
-        paqNum = 0;
 
         //initialize pesoRests with maxPeso of ofertas and calculate diaIndices
         pesoRests = new double[ofertas.length];
@@ -73,13 +78,13 @@ public class BLState {
         diaIndices[4]=ofertas.length;
     }
 
-    /**Create a new state with the given costes, fellicidad, paqNum and pesoRests.
+    /**Create a new state with the given dynamic attributes
      * This Constructor is the one that is called for creating successors and therefore only sets dynamic attributes.
      * */
-    public BLState(int costes, int felicidad, int paqNum, double[] pesoRests){
+    public BLState(int [] assignment, double costes, int felicidad, double[] pesoRests){
+        this.assignment = assignment;
         this.costes = costes;
         this.felicidad = felicidad;
-        this.paqNum = paqNum;
         this.pesoRests = pesoRests;
     }
 
@@ -95,32 +100,70 @@ public class BLState {
         return diaIndices;
     }
 
-    //Exports the dynamic attributes via the wrapper object BLDynamicState
-    public BLDynamicState getDynamicState(){
-        return new BLDynamicState(costes, felicidad, paqNum, pesoRests);
+    //returns a copy of assignment, not the array itself
+    public int[] getAssignment() {
+        int[] assignmentCopy = new int[assignment.length];
+        System.arraycopy(assignment, 0, assignmentCopy, 0, assignment.length);
+        return assignmentCopy;
     }
 
-    //A state is final, if every paquete has been assigned to a oferta, i.e. when paqNum==#paquetes
+    //A state is final, if every paquete has been assigned to a oferta, i.e. when assignment[i]>=0 for all i
     public boolean isFinal(){
-        return paqNum == paquetes.length;
+        for(int i = 0 ; i<assignment.length; i++){
+            if(assignment[i]<0) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    //returns the paquete that has to be assigned next
-    public Paquete getCurrentPaquete(){
-        return paqNum<paquetes.length?paquetes[paqNum]:null;
+    public boolean assignable(int paq, int of){
+        return (paquetes[paq].getPeso()<=pesoRests[of]
+                && BLState.maxDiaOfPrio(paquetes[paq].getPrioridad())<ofertas[of].getDias());
+    }
+
+    public BLState assign(int paq, int of){
+        int [] assignment_new = new int[assignment.length];
+        System.arraycopy(assignment, 0, assignment_new, 0, assignment.length);
+        assignment_new[paq]=of;
+
+        double costes_new = costes + BLState.butWhatDoesItCost(paquetes[paq].getPeso(), ofertas[of].getDias(), ofertas[of].getPrecio());
+        int felicidad_new = felicidad + BLState.makeMeHappy(paquetes[paq].getPrioridad(), ofertas[of].getDias());
+
+        double[] pesoRests_new = new double[pesoRests.length];
+        System.arraycopy(pesoRests, 0, pesoRests_new, 0, pesoRests.length);
+        pesoRests_new[of]-=paquetes[paq].getPeso();
+
+        return new BLState(assignment_new, costes_new, felicidad_new, pesoRests_new);
+    }
+
+    public BLState unassign(int paq){
+        int of=assignment[paq];
+
+        int [] assignment_new = new int[assignment.length];
+        System.arraycopy(assignment, 0, assignment_new, 0, assignment.length);
+        assignment_new[paq]=-1;
+
+        double costes_new = costes - BLState.butWhatDoesItCost(paquetes[paq].getPeso(), ofertas[of].getDias(), ofertas[of].getPrecio());
+        int felicidad_new = felicidad - BLState.makeMeHappy(paquetes[paq].getPrioridad(), ofertas[of].getDias());
+
+        double[] pesoRests_new = new double[pesoRests.length];
+        System.arraycopy(pesoRests, 0, pesoRests_new, 0, pesoRests.length);
+        pesoRests_new[of]+=paquetes[paq].getPeso();
+
+        return new BLState(assignment_new, costes_new, felicidad_new, pesoRests_new);
     }
 
     //returns all ofertas whose arrival dates satisfy the given prioridad
-    public Oferta[] getOfertasByPrio(int prio){
+    public static Oferta[] getOfertasByPrio(int prio){
         int ofertaPartLength = getOfertaPartLengthByPrio(prio);
-
         Oferta[] ofertasPart = new Oferta[ofertaPartLength];
         System.arraycopy(ofertas,0,ofertasPart,0,ofertaPartLength);
         return ofertasPart;
     }
 
     //Gets the number of ofertas whose arrival dates satisfy the given prioridad
-    public int getOfertaPartLengthByPrio(int prio){
+    public static int getOfertaPartLengthByPrio(int prio){
         switch(prio){
             case 0: return diaIndices[0];
             case 1: return diaIndices[2];
@@ -156,7 +199,6 @@ public class BLState {
                 almaDias++;
             }
         }
-
         return peso*precio+0.25*almaDias*peso;
     }
 

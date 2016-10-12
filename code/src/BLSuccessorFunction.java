@@ -24,40 +24,26 @@ public class BLSuccessorFunction implements SuccessorFunction{
     public List getSuccessors(Object o) {
         //cast the given object to a BLState and get all relevant attributes of it
         BLState state = (BLState)o;
-        BLDynamicState dynState = state.getDynamicState();
-        Paquete currentPaq = state.getCurrentPaquete();
-        //get all ofertas whose arrival days satisfy the priority of the paquete
-        Oferta[] ofertas = state.getOfertasByPrio(currentPaq.getPrioridad());
+        Paquete[] paquetes = BLState.getPaquetes();
 
         //initialize variables that we will use
         ArrayList successors = new ArrayList();
-        BLState newState;
-        int costes;
-        int felicidad;
-        int paqNum;
-        double[] pesoRests;
+        Oferta[] ofertas;
+        int [] assignment = state.getAssignment();
 
-        if(currentPaq != null && ofertas != null){
-            //go through the list of ofertas and search for those that the paquete could be assigned to
-            //upon finding a suitable oferta, add the number of the oferta and the resulting state to successors
-            for(int i = 0; i<ofertas.length; i++){
-                if(currentPaq.getPeso()<=dynState.getPesoRests()[i]){
-                    //get dynamic attributes of old state
-                    costes = dynState.getCostes();
-                    felicidad = dynState.getFelicidad();
-                    paqNum = dynState.getPaqNum();
-                    pesoRests = dynState.getPesoRests();
-
-                    //alter attributes depending on the oferta to which the package has been assigned
-                    paqNum++;
-                    costes += BLState.butWhatDoesItCost(currentPaq.getPeso(), ofertas[i].getDias(), ofertas[i].getPrecio());
-                    felicidad += BLState.makeMeHappy(currentPaq.getPrioridad(), ofertas[i].getDias());
-                    pesoRests[i] -= currentPaq.getPeso();
-
-                    //create new state and add it to the possible successors
-                    newState = new BLState(costes, felicidad, paqNum, pesoRests);
-                    successors.add(new Successor(""+i, newState));
+        //go through the list of ofertas and search for those that the paquete could be assigned to
+        //upon finding a suitable oferta, add the number of the oferta and the resulting state to successors
+        for(int i = 0; i < paquetes.length; i++) {
+            if(assignment[i]<0){
+                ofertas = BLState.getOfertasByPrio(paquetes[i].getPrioridad());
+                for (int j = 0; j < ofertas.length; j++) {
+                    if(state.assignable(i,j)){
+                        successors.add(new Successor("a"+i+"."+j, state.assign(i,j)));
+                    }
                 }
+            }
+            else{
+                successors.add(new Successor("u" + i, state.unassign(i)));
             }
         }
 
