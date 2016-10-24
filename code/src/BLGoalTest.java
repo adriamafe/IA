@@ -7,10 +7,8 @@ import aima.search.framework.GoalTest;
 //checks if a the given state is final. Refer to BLState.isFinal() for implementation details
 public class BLGoalTest implements GoalTest {
 
-    public BLGoalTest(){}
-
     @Override
     public boolean isGoalState(Object state) {
-        return ((BLState)state).isFinal();
+        return false;
     }
 }
