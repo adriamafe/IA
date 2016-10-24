@@ -16,35 +16,14 @@ public class BLHeuristicFunction1 implements HeuristicFunction{
 
     @Override
     public double getHeuristicValue(Object o) {
-        double value = 0;
-
         //cast given object to BLState and get all relevant attributes
         BLState state = (BLState)o;
-        int [] assignment = state.getAssignment();
-        Paquete[] paquetes = BLState.getPaquetes();
-        Oferta[] ofertas = BLState.getOfertas();
-        int [] diaIndices = BLState.getDiaIndices();
-
-        //initialize variables
-        int maxDays;
-        Oferta oferta;
-        double precio;
-        double minPrecio;
-
-        //approximiate the minimum cost of all unassigned paquetes and add it to value
-        for(int i = 0; i<paquetes.length; i++){
-            if(assignment[i]<0){
-                minPrecio = BLState.butWhatDoesItCost(paquetes[i].getPeso(), ofertas[0].getDias(), ofertas[0].getPrecio());
-                maxDays=BLState.maxDiaOfPrio(paquetes[i].getPrioridad());
-                for(int j=0; j<maxDays-1; j++){
-                    oferta = ofertas[diaIndices[j]];
-                    precio = BLState.butWhatDoesItCost(paquetes[i].getPeso(), oferta.getDias(), oferta.getPrecio());
-                    if(precio < minPrecio) minPrecio=precio;
-                }
-                value+=minPrecio;
-            }
-        }
-
-        return value;
+        return (state.get_costes());
+        
     }
+    public boolean equals(Object obj) {
+	      boolean retValue;
+	      retValue = super.equals(obj);
+	      return retValue;
+	  }
 }
