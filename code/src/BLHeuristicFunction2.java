@@ -6,54 +6,24 @@ import aima.search.framework.HeuristicFunction;
  * Created by felix on 03.10.16.
  */
 
-/*This Heuristic Functions is the one that uses both attributes (costes and felicidad) for it's heuristics.
+/*This Heuristic Function is the one that only uses one attribute (costes) for it's heuristics.
  * The heuristic is derived from a relaxed problem, in which the maximumPeso restrictions are ignored.
- * Therefore all paquetes are assigned to the best oferta, whose arrivalDate satisfies it's prioridad, whereby "best"
- * refers to the optimal combination of costes and felicidad.
+ * Therefore all paquetes are assigned to the cheapest oferta, whose arrivalDate satisfies it's prioridad.
  * */
 public class BLHeuristicFunction2 implements HeuristicFunction{
 
     public BLHeuristicFunction2(){}
 
-    //This is the value that we assign to one point of felicidad
-    private static final double FELICIDADVALUE = 10.0;
-
     @Override
     public double getHeuristicValue(Object o) {
-        double value = 0;
-
         //cast given object to BLState and get all relevant attributes
         BLState state = (BLState)o;
-        int [] assignment = state.getAssignment();
-        Paquete[] paquetes = BLState.getPaquetes();
-        Oferta[] ofertas = BLState.getOfertas();
-        int [] diaIndices = BLState.getDiaIndices();
-
-        //initialize variables
-        int maxDays;
-        Oferta oferta;
-        double precio;
-        double minPrecio;
-
-        //approximiate the minimum value of all unassigned paquetes and add it to value
-        for(int i = 0; i<paquetes.length; i++){
-            if(assignment[i]<0){
-                minPrecio = calculatePrecio(ofertas[0], paquetes[i]);
-                for(int j=1; j<state.getOfertaPartLengthByPrio(paquetes[i].getPrioridad()); j++){
-                    oferta = ofertas[j];
-                    precio = calculatePrecio(oferta, paquetes[i]);
-                    if(precio < minPrecio) minPrecio=precio;
-                }
-                value+=minPrecio;
-            }
-        }
-
-        return value;
+        return (state.get_costes()-state.get_felicidad());
+        
     }
-
-    private double calculatePrecio(Oferta oferta, Paquete paquete){
-        double precio = BLState.butWhatDoesItCost(paquete.getPeso(), oferta.getDias(), oferta.getPrecio());
-        precio -= BLState.makeMeHappy(paquete.getPrioridad(), oferta.getDias())*FELICIDADVALUE;
-        return precio;
-    }
+    public boolean equals(Object obj) {
+	      boolean retValue;
+	      retValue = super.equals(obj);
+	      return retValue;
+	  }
 }
