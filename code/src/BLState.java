@@ -323,15 +323,21 @@ public class BLState {
     void initial_solution(int num){
     	switch(num){
     	case 1:
+    		//In this case we make an aleatory assignment
     		Initial_solution1();
     		break;
     	case 2:
+    		//packets are sorted by priority and offers by days, both in ascending order
+    		//then we assign the packets
     		Initial_solution2();
     		break;
     	case 3:
+    		//Offers are sorted by prio and price
     		Initial_solution3();
     		break;
     	case 4:
+    		//Packets and offers are ordered by priority and days respectively and 
+    		//in case they are equal they are ordered by MaxWeight and Weight.
     		Initial_solution4();
     		break;
     	}
@@ -347,10 +353,9 @@ public class BLState {
     	for(int i = 0; i < ofertas.length; ++i){
     		L1.add(i);
     	}
-    	Collections.shuffle(L);
+    	while(packRests > 0){
     	for(int i = 0; i <L.size(); ++i){
     		int p = L.get(i);
-    		System.out.println(p);
     		boolean found = false;
     		int j = 0;
     		while(!found && j < ofertas.length){
@@ -362,6 +367,7 @@ public class BLState {
     			++j;
     		}
     	}
+    }
     }
     void Initial_solution2(){
     	//sort by days
@@ -382,7 +388,8 @@ public class BLState {
     
     void Initial_solution3(){
     	//sort by price
-    	Arrays.sort(ofertas,new BLComparatorOfPrice());
+    	Arrays.sort(ofertas,new BLComparatorOfPrioandPrice());
+    	Arrays.sort(paquetes,new BLPaqComparator());
     	for(int i = 0; i <paquetes.length; ++i){
     		boolean found = false;
     		int j = 0;
@@ -398,8 +405,10 @@ public class BLState {
     
     void Initial_solution4(){
     	//sort by Weight and Pesomaximo
-    	Arrays.sort(ofertas, new BLComparatorOfPesoMaximo());
-    	Arrays.sort(paquetes, new BLComparatorPaqWeight());
+    	Arrays.sort(ofertas, new BLComparatorOfPrioandWeight());
+    	Arrays.sort(paquetes, new BLComparatorPaqPrioandWeight());
+    	print_ofertas();
+    	print_paquetes();
     	for(int i = 0; i <paquetes.length; ++i){
     		boolean found = false;
     		int j = 0;
