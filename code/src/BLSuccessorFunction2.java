@@ -45,10 +45,9 @@ public class BLSuccessorFunction2 implements SuccessorFunction{
         //upon finding a suitable oferta, add the number of the oferta and the resulting state to successors
         
         for(int i = 0; i < paquetes.length;++i){
-        	for(int j = 0; j < paquetes.length; ++j){
+        	for(int j = i+1; j < paquetes.length; ++j){
         		//System.out.println("comprovant");
-        		
-        		if(i!=j && state.CanISwap(i, j)){
+        		if(state.CanISwap(i, j)){
         			int[] assignment = state.getAssignment();
             		double[] pesoRests = state.get_pesoRests();
             		BLState S =  new BLState(assignment, costes, felicidad, pesoRests,packRests);
